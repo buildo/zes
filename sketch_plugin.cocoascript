@@ -1,0 +1,77 @@
+var _find = function(array, f) {
+  var out = [];
+  for (var i = 0; i < array.count(); i++) {
+    if (f(array[i])) {
+      out.push(array[i]);
+    }
+  }
+  return out;
+}
+
+/*var _findAnchor = function(layerGroup) {*/
+  /*var children = layerGroup.children();*/
+  /*for (var i = 0; i < children.count(); i++) {*/
+    /*var child = children[i];*/
+    /*if (child.class() != 'MSRectangleLayer') {*/
+      /*log('anchor: ');*/
+      /*log(child);*/
+      /*return child;*/
+    /*}*/
+  /*}*/
+/*}*/
+
+var _findGroupsRecursive = function(layerGroup, f) {
+  var out = [];
+  var children = layerGroup.children();
+  for (var i = 0; i < children.count(); i++) {
+    var child = children[i];
+    if (child.class() == 'MSLayerGroup') {
+      if (f(child)) {
+        out.push(child);
+      }
+    }
+  }
+  return out;
+}
+
+var deletePreviousDuplicates = function(art) {
+  var toBeDeleted = _findGroupsRecursive(art, function(x) {return x.name().indexOf('DUP123') > -1;})
+  for (var i = 0; i < toBeDeleted.length; i++) {
+    toBeDeleted[i].parentGroup().removeLayer(toBeDeleted[i]);
+  }
+}
+
+var processArtboard = function(art, interactiveArt) {
+  deletePreviousDuplicates(art);
+  var anchorGroups = _findGroupsRecursive(art, function(x) {return x.name().indexOf('copy=') > -1;});
+  for (var i = 0; i < anchorGroups.length; i++) {
+    var group = anchorGroups[i];
+    var targetName = group.name().match(/copy=(_[\w_]+)/)[1];
+    var targetGroup = _findGroupsRecursive(interactiveArt, function(x) {
+      return x.name() == targetName;
+    })[0];
+    var dup = targetGroup.duplicate();
+    targetGroup.parentGroup().removeLayer(dup);
+    dup.setName(dup.name() + ' DUP123');
+    dup.setIsLocked(true);
+    dup.setIsVisible(true);
+    var anchorGroup = _findGroupsRecursive(group, function(x) {return x.name() == 'anchor';})[0];
+    var newX = anchorGroup.frame().x();
+    var newY = anchorGroup.frame().y();
+    dup.frame().setX(newX);
+    dup.frame().setY(newY);
+    group.addLayers([dup]);
+  }
+}
+
+var onRun = function(context) {
+  log('START ZEPLIN EXPORT');
+
+  var arts = context.document.pages()[0].artboards();
+  var interactiveArt = _find(arts, function(x) {return x.name() == 'interactive'})[0];
+  var zeplinArts = _find(arts, function(x) {return x.name().indexOf('zeplin') > -1;});
+  for (var i in zeplinArts) {
+    var art = zeplinArts[i];
+    processArtboard(art, interactiveArt);
+  }
+}
