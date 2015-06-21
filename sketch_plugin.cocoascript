@@ -36,7 +36,8 @@ var processArtboard = function(art, interactiveArt) {
     var group = anchorGroups[i];
     var targetName = group.name().match(/copy=(_[\w_]+)/)[1];
     var targetGroup = _findGroupsRecursive(interactiveArt, function(x) {
-      return x.name() == targetName;
+      var firstSection = x.name().componentsSeparatedByString(', ')[0]
+      return firstSection == targetName;
     })[0];
     var dup = targetGroup.duplicate();
     targetGroup.parentGroup().removeLayer(dup);
