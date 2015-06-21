@@ -44,9 +44,19 @@ var processArtboard = function(art, interactiveArt) {
     dup.setName(dup.name() + ' DUP123');
     dup.setIsLocked(true);
     dup.setIsVisible(true);
-    var anchorGroup = _findGroupsRecursive(group, function(x) {return x.name() == 'anchor';})[0];
-    var newX = anchorGroup.frame().x();
-    var newY = anchorGroup.frame().y();
+    var anchorGroup = _findGroupsRecursive(group, function(x) {return x.name().indexOf('anchor') == 0;})[0];
+    var anchorName = anchorGroup.name();
+    // compute offsets
+    var xOffset = 0;
+    if (anchorName.indexOf('x=') > -1) {
+      xOffset = parseInt(anchorGroup.name().match(/x=(\d+)/)[1]);
+    }
+    var yOffset = 0;
+    if (anchorName.indexOf('y=') > -1) {
+      yOffset = parseInt(anchorGroup.name().match(/y=(\d+)/)[1]);
+    }
+    var newX = anchorGroup.frame().x() + xOffset;
+    var newY = anchorGroup.frame().y() + yOffset;
     dup.frame().setX(newX);
     dup.frame().setY(newY);
     group.addLayers([dup]);
