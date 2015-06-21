@@ -128,6 +128,8 @@ for _name, _layer of originalLayers
 				targets.push l
 				panels.push layers[panelName]
 			tabs(targets, panels)
+		if section.indexOf("__hide") > -1
+			_layer.visible = false
 		if section.indexOf("show=") > -1
 			panelName = section.match(/show=(_[\w_]+)/)[1]
 			if v then print "show", _layer, layers[panelName]
