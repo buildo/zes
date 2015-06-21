@@ -91,6 +91,11 @@ hides = (target, panel) ->
 	target.on Events.Click, ->
 		panel.visible = false
 
+makeScrollable = (panel, x, y) ->
+	scroll = ScrollComponent.wrap(panel)
+	scroll.scrollHorizontal = x
+	scroll.scrollVertical = y
+
 # generic setup
 v = false
 window.layers = {}
@@ -131,3 +136,6 @@ for _name, _layer of originalLayers
 			panelName = section.match(/hide=(_[\w_]+)/)[1]
 			if v then print "hide", _layer, layers[panelName]
 			hides(_layer, layers[panelName])
+		if section.indexOf("scroll=") > -1
+			directions = section.match(/scroll=([xy]+)/)[1]
+			makeScrollable(_layer, directions.indexOf("x") > -1, directions.indexOf("y") > -1)
