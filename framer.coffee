@@ -20,6 +20,14 @@ getAllSubLayersContaining = (_layer, _name) ->
 			out.push l
 	out
 
+getFirstParentWithName = (_layer) ->
+	parent = _layer.superLayer
+	parentName = parent.name.split(",_")[0]
+	if layers[parentName]?
+		parent
+	else
+		getFirstParentWithName(parent)
+
 collapsible = (_opened, _closed, _opened_target, _closed_target, _onChange) ->
 	_opened_target.style.cursor = 'pointer'
 	_opened_target.on Events.Click, ->
@@ -102,12 +110,18 @@ makeScrollable = (panel, x, y) ->
 	scroll = ScrollComponent.wrap(panel)
 	scroll.scrollHorizontal = x
 	scroll.scrollVertical = y
-	_layer.style.cursor = 'pointer'
+
+goTo = (target, destinationLayer) ->
+	layerToHide = getFirstParentWithName(target)
+	target.on Events.Click, ->
+		layerToHide.visible = false
+		destinationLayer.visible = true
+
+resetVisibilities = ->
+	if section.indexOf("__hide") > -1
+			_layer.visible = false
 
 printClick = (layer) ->
-		_layer.states.add
-			off: {visible: false}
-			on: {visible: true}
 	layer.on Events.Click, ->
 		print ">>>> CLICK >>>>>", layer
 
@@ -127,7 +141,7 @@ for _name, _layer of originalLayers
 	nameSections = _name.split(",_")
 	for section in nameSections
 		if section.indexOf("toggle=") > -1
-			layerToToggle = section.match(/toggle=(_[\w_]+)/)[1]
+			layerToToggle = section.match(/toggle=(_[\d\w_]+)/)[1]
 			togglable(layers[layerToToggle], _layer)
 		if section.indexOf("__mouse") > -1
 			hover(_layer)
@@ -136,19 +150,23 @@ for _name, _layer of originalLayers
 			panels = []
 			ls = getAllSubLayersContaining(_layer, 'panel=')
 			for l in ls
-				panelName = l.name.match(/panel=(_[\w_]+)/)[1]
+				panelName = l.name.match(/panel=(_[\d\w_]+)/)[1]
 				targets.push l
 				panels.push layers[panelName]
 			tabs(targets, panels)
 		if section.indexOf("__hide") > -1
 			_layer.visible = false
+			if v then print("__hide", _layer)
 		if section.indexOf("show=") > -1
-			panelName = section.match(/show=(_[\w_]+)/)[1]
+			panelName = section.match(/show=(_[\d\w_]+)/)[1]
 			if v then print "show", _layer, layers[panelName]
 			shows(_layer, layers[panelName])
 		if section.indexOf("hide=") > -1
-			panelName = section.match(/hide=(_[\w_]+)/)[1]
+			panelName = section.match(/hide=(_[\d\w_]+)/)[1]
 			hides(_layer, layers[panelName])
 		if section.indexOf("scroll=") > -1
 			directions = section.match(/scroll=([xy]+)/)[1]
 			makeScrollable(_layer, directions.indexOf("x") > -1, directions.indexOf("y") > -1)
+		if section.indexOf("goto=") > -1
+			destinationLayer = section.match(/goto=(_[\d\w_]+)/)[1]
+			goTo(_layer, layers[destinationLayer])
