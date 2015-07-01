@@ -65,10 +65,11 @@ tabs = (_targets, _panels) ->
 			getSubLayerContaining(s[0], '__hover')?.visible = false
 
 	_targets.map((t) ->
-		if getSubLayer(t, '__hover')
+		if getSubLayerContaining(t, '__hover')
 			t.on Events.MouseOver, ->
-				if getSubLayerContaining(t, '__inactive')?.visible
-					getSubLayerContaining(t, '__inactive')?.visible = false
+				if not getSubLayerContaining(t, '__active')?.visible
+					if getSubLayerContaining(t, '__inactive')?.visible
+						getSubLayerContaining(t, '__inactive')?.visible = false
 					getSubLayerContaining(t, '__hover')?.visible = true
 			t.on Events.MouseOut, ->
 				if getSubLayerContaining(t, '__hover')?.visible
