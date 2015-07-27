@@ -137,8 +137,10 @@ window.layers = {}
 window.layerActions = {}
 # first import all layers that begin with an underscore..
 for _name, _layer of originalLayers
-	if _name.substring(0, 1) == "_" and _name.substring(1, 1) != "_"
+	if _name.substring(0, 1) == "_" and _name.substring(1, 2) != "_"
 		baseName = _name.split(",_")[0]
+		if window[baseName]
+			print "WARNING! duplicate layer name#{baseName}"
 		window[baseName] = _layer
 		window.layers[baseName] = _layer
 # then autoapply basic actions..
