@@ -94,16 +94,18 @@ printHierarchy = (p, l=0) ->
 
 shows = (target, panel) ->
 # 	return
-	if window.v then print "shows", target, panel
+	if window.v then print "shows", target.name, panel.name
 	target.style.cursor = 'pointer'
 	target.on Events.Click, ->
+		if window.v then print "showing", target.name, panel.name
 		panel.visible = true
 
 hides = (target, panel) ->
 # 	return
-	if window.v then print "hides", target, panel
+	if window.v then print "hides", target.name, panel.name
 	target.style.cursor = 'pointer'
 	target.on Events.Click, ->
+		if window.v then print "hiding", target.name, panel.name
 		panel.visible = false
 
 makeScrollable = (panel, x, y) ->
@@ -114,6 +116,8 @@ makeScrollable = (panel, x, y) ->
 
 goTo = (target, destinationLayer) ->
 	layerToHide = getFirstParentWithName(target)
+	if window.v then print "goes to", target.name, destinationLayer.name, "and hides", layerToHide.name
+	target.style.cursor = 'pointer'
 	target.on Events.Click, ->
 		layerToHide.visible = false
 		destinationLayer.visible = true
